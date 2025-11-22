@@ -6,6 +6,8 @@ public class UserResponse {
     private String email;
     private String role;
 
+    public UserResponse() {}
+
     public UserResponse(Long id, String username, String email, String role) {
         this.id = id;
         this.username = username;
@@ -13,7 +15,6 @@ public class UserResponse {
         this.role = role;
     }
 
-    // Getters
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public String getEmail() { return email; }

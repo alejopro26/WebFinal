@@ -1,48 +1,65 @@
 package chatnexus.service;
 
-import chatnexus.dto.RegisterRequest;
-import chatnexus.dto.UserResponse;
+import chatnexus.dto.*;
+import chatnexus.jwt.JwtService;
 import chatnexus.model.Role;
 import chatnexus.model.User;
-import chatnexus.repository.RoleRepository;
 import chatnexus.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       AuthenticationManager authenticationManager) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+    }
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    public UserResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("El correo ya está registrado");
+    public UserResponse register(RegisterRequest req) {
+        if (req.getEmail() == null || req.getPassword() == null) {
+            throw new IllegalArgumentException("Email and password required");
+        }
+        if (userRepository.existsByEmail(req.getEmail())) {
+            throw new RuntimeException("Email already registered");
         }
 
-        Role role = roleRepository.findByName(request.getRole())
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
-
         User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(role);
+        user.setUsername(req.getUsername() == null ? req.getEmail() : req.getUsername());
+        user.setEmail(req.getEmail());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
 
-        userRepository.save(user);
+        try {
+            user.setRole(Role.valueOf(req.getRole().toUpperCase()));
+        } catch (Exception e) {
+            user.setRole(Role.USER);
+        }
 
-        return new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                role.getName()
+        User saved = userRepository.save(user);
+        return new UserResponse(saved.getId(), saved.getUsername(), saved.getEmail(), saved.getRole().name());
+    }
+
+    public AuthResponse login(LoginRequest req) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
         );
+
+        User user = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token, "Login exitoso");
     }
 }
-

@@ -4,9 +4,10 @@ public class RegisterRequest {
     private String username;
     private String email;
     private String password;
-    private String role;
+    private String role; // string name of enum
 
-    // Getters y setters
+    public RegisterRequest() {}
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
@@ -19,4 +20,3 @@ public class RegisterRequest {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 }
-

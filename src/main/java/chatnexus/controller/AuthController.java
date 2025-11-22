@@ -1,25 +1,26 @@
 package chatnexus.controller;
 
-import chatnexus.dto.RegisterRequest;
-import chatnexus.dto.UserResponse;
+import chatnexus.dto.*;
 import chatnexus.service.AuthService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest request) {
-        UserResponse response = authService.register(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest req) {
+        return ResponseEntity.ok(authService.register(req));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
+        return ResponseEntity.ok(authService.login(req));
     }
 }
-
-

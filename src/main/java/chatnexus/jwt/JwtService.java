@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -19,69 +18,73 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${jwt.secret}")
-    private String secretKey;
+    private String secretBase64;
 
     @Value("${jwt.expiration}")
-    private long jwtExpiration;
+    private long expirationMs;
 
-    /**
-     * Genera un token JWT con claims adicionales.
-     */
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    private Key getSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretBase64);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts
-                .builder()
+    public String generateToken(Map<String, Object> extraClaims, String subject) {
+        return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    /**
-     * Extrae el username del token.
-     */
+    public String generateToken(String subject) {
+        return generateToken(Map.of(), subject);
+    }
+
+    // ==========================================
+    // IMPORTANTES PARA WEBSOCKET
+    // ==========================================
+
+    // Extraer username desde el JWT
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    // Validación general de token (sin UserDetails)
+    public boolean validateToken(String token) {
+        try {
+            // Si no lanza excepción -> token válido
+            Jwts.parserBuilder()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token);
+
+            return !isTokenExpired(token);
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
+    // Validar expiración públicamente (lo necesitas para WebSocket)
+    public boolean isTokenExpired(String token) {
+        Date exp = extractClaim(token, Claims::getExpiration);
+        return exp.before(new Date());
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
+        final Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+        return resolver.apply(claims);
     }
 
-    private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    /**
-     * Verifica que el token sea válido (usuario y fecha).
-     */
+    // Validación clásica con UserDetails (HTTP)
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
-
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
 }
-
