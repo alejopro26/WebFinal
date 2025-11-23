@@ -37,8 +37,8 @@ public class ChatWebSocketController {
                             Authentication authentication) {
 
         // Obtener usuario autenticado
-        String username = authentication.getName();
-        User sender = userRepository.findByUsername(username)
+        String principal = authentication.getName();
+        User sender = userRepository.findByEmail(principal)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         // Obtener sala
