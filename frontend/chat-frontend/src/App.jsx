@@ -69,6 +69,17 @@ function App() {
     await loadRooms()
   }
 
+  async function loadHistory() {
+    if (!selectedRoomId || !token) return
+    const res = await fetch(`/api/rooms/${selectedRoomId}/messages`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setMessages(data)
+    }
+  }
+
   function connectRoom() {
     if (!token || !selectedRoomId) {
       alert('Selecciona una sala y haz login')
@@ -85,6 +96,7 @@ function App() {
         const msg = JSON.parse(frame.body)
         setMessages((prev) => [...prev, msg])
       })
+      loadHistory()
     }
 
     stomp.onStompError = () => {
@@ -146,6 +158,7 @@ function App() {
             <button onClick={connectRoom} disabled={connecting} style={{ marginLeft: 8 }}>
               {connecting ? 'Conectando...' : 'Conectar'}
             </button>
+            <button onClick={loadHistory} style={{ marginLeft: 8 }}>Cargar historial</button>
           </div>
 
           <div style={{ marginTop: 16 }}>
