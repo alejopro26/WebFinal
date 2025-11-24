@@ -7,6 +7,9 @@ import chatnexus.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import java.util.Optional;
 
 @Service
 public class MessageService {
@@ -30,5 +33,24 @@ public class MessageService {
     // Obtener historial de una sala
     public List<Message> getMessagesByRoom(ChatRoom room) {
         return messageRepository.findByRoomOrderBySentAtAsc(room);
+    }
+
+    public Page<Message> getMessagesByRoom(ChatRoom room, int page, int size) {
+        return messageRepository.findByRoomOrderBySentAtAsc(room, PageRequest.of(page, size));
+    }
+
+    public Optional<Message> findById(Long id) {
+        return messageRepository.findById(id);
+    }
+
+    public void delete(Long id) {
+        messageRepository.deleteById(id);
+    }
+
+    public void updateContent(Long id, String content) {
+        messageRepository.findById(id).ifPresent(m -> {
+            m.setContent(content);
+            messageRepository.save(m);
+        });
     }
 }

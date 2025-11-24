@@ -15,12 +15,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest req) {
+    public ResponseEntity<UserResponse> register(@RequestBody @jakarta.validation.Valid RegisterRequest req) {
         return ResponseEntity.ok(authService.register(req));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @jakarta.validation.Valid LoginRequest req) {
         return ResponseEntity.ok(authService.login(req));
     }
 }

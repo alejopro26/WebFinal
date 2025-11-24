@@ -1,16 +1,46 @@
-# React + Vite
+# ChatNexus – Demo Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Arranque rápido
 
-Currently, two official plugins are available:
+1. Instalar dependencias
+   ```bash
+   npm install
+   ```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+2. Levantar el backend (desde la raíz del proyecto)
+   ```bash
+   cd ../..
+   mvn spring-boot:run -Dspring.profiles.active=dev
+   ```
 
-## React Compiler
+3. Levantar el frontend (en esta carpeta)
+   ```bash
+   npm run dev
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+4. Abrir http://localhost:5173 y loguearte con cualquier usuario registrado.
 
-## Expanding the ESLint configuration
+## Scripts útiles
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `npm run dev` – servidor de desarrollo con hot-reload y proxy a `localhost:8080/api`
+- `npm run build` – build de producción en `dist/`
+- `npm run lint` – ESLint sin warnings
+- `npm run preview` – previsualizar build local
+
+## Características visibles para el profesor
+
+- **Notificaciones flotantes** (sin `alert()`)
+- **Panel de Salud y Métricas HTTP** con conteo por método/estado y agregados `2xx/3xx/4xx/5xx`
+- **Moderación en tiempo real**: ban/unban servidor, mute/unmute canal
+- **Permisos por rol**: OWNER / MODERATOR / MEMBER con ACL por canal
+- **Audit trail**: botones “Ver auditoría ACL / MOD” con últimos 10 eventos
+- **Chat multicanal**: salas públicas/privadas, mensajes directos, archivos adjuntos
+- **Presencia y “escribiendo…”** vía WebSocket
+
+## Tecnologías
+
+React 19 + Vite + Tailwind CSS + SockJS/STOMP + Mantine (componentes) + Framer Motion (animaciones).
+
+## Captura de UI
+
+![ui-preview](https://trae-api-us.mchost.guru/api/ide/v1/text_to_image?prompt=Clean%20dark%20chat%20UI%20with%20sidebar%20rooms%2C%20floating%20toasts%2C%20health%20metrics%20panel%2C%20Spanish%20labels%2C%20modern%20Discord-like%20colors%2C%20desktop%20viewport&image_size=landscape_16_9)

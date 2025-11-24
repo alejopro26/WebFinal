@@ -2,11 +2,15 @@ package chatnexus.dto;
 
 public class MessageDTO {
 
+    private Long id;
     private Long roomId;
     private String content;
     private String sender;
 
     public MessageDTO() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public Long getRoomId() {
         return roomId;

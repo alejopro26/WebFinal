@@ -43,13 +43,13 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 throw new RuntimeException("Token inválido");
             }
 
-            String username = jwtService.extractUsername(token);
+            String subject = jwtService.extractUsername(token); // el subject es el email
 
-            User user = userRepository.findByUsername(username)
+            User user = userRepository.findByEmail(subject)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
             Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(username, null, null);
+                    new UsernamePasswordAuthenticationToken(subject, null, null);
 
             accessor.setUser(authentication);
         }

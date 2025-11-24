@@ -1,7 +1,19 @@
 {
+  "name": "chatnexus",
+  "version": "1.0.0",
+  "description": "Chat en tiempo real con salas, canales, moderación y auditoría",
+  "scripts": {
+    "demo": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "mvn spring-boot:run -Dspring.profiles.active=dev",
+    "frontend:dev": "cd frontend/chat-frontend && npm run dev",
+    "build": "mvn clean package -DskipTests && cd frontend/chat-frontend && npm run build",
+    "test": "mvn test && cd frontend/chat-frontend && npm run test -- --run",
+    "lint": "cd frontend/chat-frontend && npm run lint"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.22",
+    "concurrently": "^9.2.2",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^3.4.18"
   }
 }

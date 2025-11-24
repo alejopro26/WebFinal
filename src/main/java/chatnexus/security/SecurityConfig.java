@@ -36,6 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/ws", "/ws/**", "/api/ws", "/api/ws/**").permitAll()
+                        // actuator solo en dev (se habilita via profile)
+                        .requestMatchers("/api/actuator/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
